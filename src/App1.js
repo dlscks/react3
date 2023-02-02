@@ -2,13 +2,17 @@ import "./App.css";
 import React, { useEffect, useState } from "react"; //버전17 이후에는 jsx 사용하더라도 별도로 사용안해줘도 됨
 import axios from "axios";
 import { baseUrl } from "./commonApi/todoApi";
+import Input from "./components/input1";
+import Todo from "./components/todo1";
 
+//상태전달: props
 function App() {
   const wrap = {
     width: "500px",
     border: "1px solid black",
     margin: "10px auto",
   };
+
   //const baseUrl = "http://localhost:8090";
 
   const [todos, setTodos] = useState([]);
@@ -18,24 +22,30 @@ function App() {
     getTodos();
   }, []);
 
+  const handleChangeText = (e) => {
+    setInput(e.target.value);
+  };
+
   //백엔드 데이터를 가져오기 위해선 axios가 필요하다. npm install axios
-  //동기화처리를 위해서 async가 필요
+  //동기화 처리를 위해서 async를 넣어준다.
   async function getTodos() {
-    //동기화 부분에 처리를 기다리기 위해서 await 를 사용한다.
-    //await 는 async function 내부에서만 사용가능하다.
+    //spring boot에 설정해 놓은 url 주소로 연결한 후, response.data를 통해 정보를 받아옴
+    //동기화 처리부분이 필요한 부분에 await를 사용한다.
     await axios
       .get(baseUrl + "/todo/all")
       .then((response) => {
-        //console.log(response.data);
-        console.log("11111111111111");
+        //  console.log(response.data);
+        console.log("11111111111111111111111");
         setTodos(response.data);
       })
+      //에러가 발생하면 에러 값을 출력
       .catch((error) => {
-        console.log("ww3333232323232");
+        console.log(error);
       });
+
+    console.log("ww33232323232323");
   }
 
-  //DB에 insert
   const insertTodo = async (e) => {
     e.preventDefault();
     await axios
@@ -49,11 +59,7 @@ function App() {
         console.log(error);
       });
 
-    setInput("할일이 추가됨!");
-  };
-
-  const handleChangeText = (e) => {
-    setInput(e.target.value);
+    console.log("할일이 추가됨!");
   };
 
   const updateTodo = async (id, completed) => {
@@ -63,7 +69,7 @@ function App() {
         setTodos(
           todos.map((todo) =>
             todo.id === id
-              ? { ...todo, completed: todo.completed === 1 ? 0 : 1 }
+              ? { ...todo, completed: todo.completed == 1 ? 0 : 1 }
               : todo
           )
         );
@@ -90,41 +96,14 @@ function App() {
   }, [input]);
 
   return (
-    //JSX사용
     <div className="App" style={wrap}>
-      <h1>TODO LIST</h1>
-      <form onSubmit={insertTodo}>
-        <input
-          type="text"
-          required={true}
-          value={input}
-          onChange={handleChangeText}
-        />
-        <input type="submit" value="Create" />
-      </form>
-      {todos
-        ? todos.map((todo) => {
-            return (
-              <div className="todo" key={todo.id}>
-                <h3>
-                  <label
-                    className={todo.completed ? "completed" : null}
-                    onClick={() => updateTodo(todo.id, todo.completed)}
-                  >
-                    {todo.todoname}
-                  </label>
-                  <label
-                    onClick={() => {
-                      deleteTodo(todo.id);
-                    }}
-                  >
-                    &nbsp;&nbsp;&nbsp;삭제
-                  </label>
-                </h3>
-              </div>
-            );
-          })
-        : null}
+      <h1>TODO LIST1(props)</h1>
+      <Input
+        input={input}
+        insertTodo={insertTodo}
+        handleChangeText={handleChangeText}
+      />
+      <Todo todos={todos} updateTodo={updateTodo} deleteTodo={deleteTodo} />
     </div>
   );
 }
